@@ -167,6 +167,23 @@ private[spark] object PythonRDD extends Logging {
     serveIterator(rdd.collect().iterator, s"serve RDD ${rdd.id}")
   }
 
+  /**
+   * A helper function to collect an RDD as an iterator, then serve it via socket.
+   * This method is similar with `PythonRDD.collectAndServe`, but user can specify job group id,
+   * job description, and interruptOnCancel option.
+   *
+   * Note: This method are temporary, might be removed in future. See ML-6684 for details.
+   */
+  def collectAndServeWithJobGroup[T](
+    rdd: RDD[T],
+    groupId: String,
+    description: String,
+    interruptOnCancel: Boolean): Array[Any] = {
+    val sc = rdd.sparkContext
+    sc.setJobGroup(groupId, description, interruptOnCancel)
+    serveIterator(rdd.collect().iterator, s"serve RDD ${rdd.id}")
+  }
+
   def toLocalIteratorAndServe[T](rdd: RDD[T]): Array[Any] = {
     serveIterator(rdd.toLocalIterator, s"serve toLocalIterator")
   }
